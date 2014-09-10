@@ -61,7 +61,8 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 {
    self.textView = [[UITextView alloc] init];
    [self.textView setFont:[UIFont fontWithName:@"HelveticaNeue-Light" size:16]];
-   self.textView.backgroundColor = [UIColor redColor];
+   self.textView.backgroundColor = [UIColor blueColor];
+   self.textView.alpha = .5;
    self.textView.textColor = [UIColor whiteColor];
    self.textView.showsVerticalScrollIndicator = NO;
    self.textView.editable = NO;
@@ -135,7 +136,7 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 
 - (void)setParentNavigationBarsHidden:(BOOL)hidden
 {
-   UIViewController* parentViewController = self.parentController;
+   UIViewController* parentViewController = self.parentController.parentViewController;
    while (parentViewController != nil)
    {
       parentViewController.navigationController.navigationBarHidden = hidden;
@@ -145,6 +146,8 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 
 - (void)animateWithState:(GKTextOverlayState)state
 {
+
+   [[UIApplication sharedApplication] setStatusBarStyle: (state != GKTextOverlayStateDisplay) ? UIStatusBarStyleDefault : UIStatusBarStyleLightContent];
    switch (state)
    {
       case GKTextOverlayStateDefault:
@@ -163,12 +166,22 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 - (void)presentTextOverlay
 {
    [self.topMostSuperview addSubview:self.doneButton];
-   [self.topMostSuperview.layer insertSublayer:self.dimLayer below:self.doneButton.layer];
+   [self.topMostSuperview addSubview:self.textView];
+   [self.topMostSuperview.layer addSublayer:self.dimLayer];
    [self setParentNavigationBarsHidden:YES];
+
+   self.doneButton.layer.zPosition = 100;
+   self.textView.layer.zPosition = 100;
+   self.textView.frame = CGRectMake(0, CGRectGetHeight([UIScreen mainScreen].bounds), CGRectGetWidth([UIScreen mainScreen].bounds), 400);
+
+   [UIView animateWithDuration:.3 animations:^{
+      self.textView.frame = CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + 10, CGRectGetWidth([UIScreen mainScreen].bounds), 400);
+   }];
 }
 
 - (void)dismissTextOverlay
 {
+   [self.textView removeFromSuperview];
    [self.doneButton removeFromSuperview];
    [self.dimLayer removeFromSuperlayer];
    [self setParentNavigationBarsHidden:NO];
