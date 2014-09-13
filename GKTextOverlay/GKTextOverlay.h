@@ -10,10 +10,7 @@
 
 @interface GKTextOverlay : UIViewController
 
-// defaults to 32
-@property (nonatomic) CGFloat headerFontSize;
-
-// defautls to 24
+// defautls to 18
 @property (nonatomic) CGFloat bodyFontSize;
 
 // Defaults to Helvetica Neue
