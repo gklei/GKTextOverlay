@@ -18,7 +18,9 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 @interface GKTextOverlay ()
 
 @property (nonatomic) UIView* topMostSuperview;
-@property (nonatomic) UITextView* textView;
+
+@property (nonatomic) UILabel* headerLabel;
+@property (nonatomic) UITextView* bodyTextView;
 
 @property (nonatomic) UIViewController* parentController;
 
@@ -40,13 +42,17 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    {
       self.view = [[UIView alloc] initWithFrame:[UIScreen mainScreen].bounds];
 
-      self.headerText = headerText;
-      self.bodyText = bodyText;
+      _headerText = headerText;
+
+      _bodyFontSize = 18;
+      _bodyText = bodyText;
+
       self.parentController = parentController;
 
       [self setupTextView];
       [self setupDimLayer];
       [self setupDoneButton];
+      [self setupHeaderLabel];
    }
    return self;
 }
@@ -57,17 +63,33 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 }
 
 #pragma mark - Setup
+- (void)setupHeaderLabel
+{
+   CGFloat widthOfButtonAndPadding = CGRectGetWidth([UIScreen mainScreen].bounds) - CGRectGetMinX(self.doneButton.frame);
+   CGFloat headerWidth = CGRectGetWidth([UIScreen mainScreen].bounds) - widthOfButtonAndPadding*2;
+   CGFloat headerHeight = CGRectGetMaxY(self.doneButton.frame) - CGRectGetMinY(self.doneButton.frame);
+   CGFloat headerXPosition = CGRectGetWidth([UIScreen mainScreen].bounds) - CGRectGetMinX(self.doneButton.frame);
+   CGFloat headerYPosition = CGRectGetMinY(self.doneButton.frame);
+
+   self.headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(headerXPosition, headerYPosition, headerWidth, headerHeight)];
+   self.headerLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:24];
+   self.headerLabel.textColor = [UIColor whiteColor];
+   self.headerLabel.textAlignment = NSTextAlignmentCenter;
+   self.headerLabel.text = self.headerText;
+
+   [self sizeLabel:self.headerLabel toRect:self.headerLabel.frame];
+}
+
 - (void)setupTextView
 {
-   self.textView = [[UITextView alloc] init];
-   [self.textView setFont:[UIFont fontWithName:@"HelveticaNeue-Light" size:16]];
-   self.textView.backgroundColor = [UIColor blueColor];
-   self.textView.alpha = .5;
-   self.textView.textColor = [UIColor whiteColor];
-   self.textView.showsVerticalScrollIndicator = NO;
-   self.textView.editable = NO;
-   self.textView.selectable = NO;
-   self.textView.text = self.bodyText;
+   self.bodyTextView = [[UITextView alloc] init];
+   [self.bodyTextView setFont:[UIFont fontWithName:@"HelveticaNeue-Light" size:self.bodyFontSize]];
+   self.bodyTextView.backgroundColor = [UIColor clearColor];
+   self.bodyTextView.textColor = [UIColor whiteColor];
+   self.bodyTextView.showsVerticalScrollIndicator = NO;
+   self.bodyTextView.editable = NO;
+   self.bodyTextView.selectable = NO;
+   self.bodyTextView.text = self.bodyText;
 }
 
 - (void)setupDimLayer
@@ -121,6 +143,24 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    }
 }
 
+- (void)setHeaderText:(NSString *)headerText
+{
+   if (_headerText != headerText)
+   {
+      _headerText = headerText;
+      self.headerLabel.text = _headerText;
+   }
+}
+
+- (void)setBodyText:(NSString *)bodyText
+{
+   if (_bodyText != bodyText)
+   {
+      _bodyText = bodyText;
+      self.bodyTextView.text = _bodyText;
+   }
+}
+
 #pragma mark - Private
 - (void)updateDoneButtonWithState:(GKTextOverlayState)state
 {
@@ -166,22 +206,29 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 - (void)presentTextOverlay
 {
    [self.topMostSuperview addSubview:self.doneButton];
-   [self.topMostSuperview addSubview:self.textView];
+   [self.topMostSuperview addSubview:self.bodyTextView];
+   [self.topMostSuperview addSubview:self.headerLabel];
    [self.topMostSuperview.layer addSublayer:self.dimLayer];
    [self setParentNavigationBarsHidden:YES];
 
+   self.headerLabel.layer.zPosition = 100;
    self.doneButton.layer.zPosition = 100;
-   self.textView.layer.zPosition = 100;
-   self.textView.frame = CGRectMake(0, CGRectGetHeight([UIScreen mainScreen].bounds), CGRectGetWidth([UIScreen mainScreen].bounds), 400);
+   self.bodyTextView.layer.zPosition = 100;
+   self.bodyTextView.frame = CGRectMake(0, CGRectGetHeight([UIScreen mainScreen].bounds), CGRectGetWidth([UIScreen mainScreen].bounds), 400);
 
-   [UIView animateWithDuration:.3 animations:^{
-      self.textView.frame = CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + 10, CGRectGetWidth([UIScreen mainScreen].bounds), 400);
-   }];
+   CGFloat padding = 10;
+   CGFloat textViewYPosition = CGRectGetMaxY(self.doneButton.frame) + padding;
+   CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - textViewYPosition*2;
+
+//   [UIView animateWithDuration:.3 animations:^{
+      self.bodyTextView.frame = CGRectMake(0, textViewYPosition, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
+//   }];
 }
 
 - (void)dismissTextOverlay
 {
-   [self.textView removeFromSuperview];
+   [self.headerLabel removeFromSuperview];
+   [self.bodyTextView removeFromSuperview];
    [self.doneButton removeFromSuperview];
    [self.dimLayer removeFromSuperlayer];
    [self setParentNavigationBarsHidden:NO];
@@ -190,6 +237,43 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 - (void)dismiss:(FlatPillButton*)sender
 {
    self.state = GKTextOverlayStateDefault;
+}
+
+- (void)sizeLabel:(UILabel*)label toRect:(CGRect)labelRect
+{
+   // Set the frame of the label to the targeted rectangle
+   label.frame = labelRect;
+
+   // Try all font sizes from largest to smallest font size
+   int fontSize = 300;
+   int minFontSize = 5;
+
+   // Fit label width wize
+   CGSize constraintSize = CGSizeMake(label.frame.size.width, MAXFLOAT);
+
+   do {
+      // Set current font size
+      label.font = [UIFont fontWithName:label.font.fontName size:fontSize];
+
+      // Find label size for current font size
+      CGRect textRect = [[label text] boundingRectWithSize:constraintSize
+                                                   options:NSStringDrawingUsesLineFragmentOrigin
+                                                attributes:@{NSFontAttributeName:label.font}
+                                                   context:nil];
+
+      CGSize labelSize = textRect.size;
+
+      // Done, if created label is within target size
+      CGFloat labelWidth = [label.text sizeWithAttributes:@{NSFontAttributeName : label.font}].width;
+      if (labelSize.height <= CGRectGetHeight(label.frame) && labelWidth <= CGRectGetWidth(label.frame))
+      {
+         break;
+      }
+
+      // Decrease the font size and try again
+      fontSize -= 2;
+
+   } while (fontSize > minFontSize);
 }
 
 #pragma mark - Public
