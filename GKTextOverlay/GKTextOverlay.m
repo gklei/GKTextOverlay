@@ -86,7 +86,7 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    [self.bodyTextView setFont:[UIFont fontWithName:@"HelveticaNeue-Light" size:self.bodyFontSize]];
    self.bodyTextView.backgroundColor = [UIColor clearColor];
    self.bodyTextView.textColor = [UIColor whiteColor];
-   self.bodyTextView.showsVerticalScrollIndicator = NO;
+   self.bodyTextView.showsVerticalScrollIndicator = YES;
    self.bodyTextView.editable = NO;
    self.bodyTextView.selectable = NO;
    self.bodyTextView.text = self.bodyText;
