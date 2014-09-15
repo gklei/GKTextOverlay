@@ -90,6 +90,7 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    self.bodyTextView.editable = NO;
    self.bodyTextView.selectable = NO;
    self.bodyTextView.text = self.bodyText;
+   self.bodyTextView.indicatorStyle = UIScrollViewIndicatorStyleWhite;
 }
 
 - (void)setupDimLayer
