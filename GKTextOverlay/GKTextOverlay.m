@@ -8,6 +8,7 @@
 
 #import "GKTextOverlay.h"
 #import "FlatPillButton.h"
+#import "UIImage+ImageEffects.h"
 
 typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 {
@@ -21,6 +22,7 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 
 @property (nonatomic) UILabel* headerLabel;
 @property (nonatomic) UITextView* bodyTextView;
+@property (nonatomic) UIImageView* imageView;
 
 @property (nonatomic) UIViewController* parentController;
 
@@ -44,7 +46,7 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 
       _headerText = headerText;
 
-      _bodyFontSize = 18;
+      _bodyFontSize = 20;
       _bodyText = bodyText;
 
       self.parentController = parentController;
@@ -72,7 +74,7 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    CGFloat headerYPosition = CGRectGetMinY(self.doneButton.frame);
 
    self.headerLabel = [[UILabel alloc] initWithFrame:CGRectMake(headerXPosition, headerYPosition, headerWidth, headerHeight)];
-   self.headerLabel.font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:24];
+   self.headerLabel.font = [UIFont fontWithName:@"HelveticaNeue-CondensedBold" size:24];
    self.headerLabel.textColor = [UIColor whiteColor];
    self.headerLabel.textAlignment = NSTextAlignmentCenter;
    self.headerLabel.text = self.headerText;
@@ -97,9 +99,8 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 {
    self.dimLayer = [CALayer layer];
    self.dimLayer.frame = [UIScreen mainScreen].bounds;
-   self.dimLayer.opacity = .9;
-   self.dimLayer.backgroundColor = [UIColor blackColor].CGColor;
    self.dimLayer.actions = @{@"frame" : [NSNull null], @"bounds" : [NSNull null], @"position" : [NSNull null]};
+   self.dimLayer.opacity = 0;
 }
 
 - (void)setupDoneButton
@@ -162,6 +163,19 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    }
 }
 
+- (void)setImage:(UIImage *)image
+{
+   if (image != nil)
+   {
+      self.imageView = [[UIImageView alloc] initWithImage:image];
+   }
+   else
+   {
+      self.imageView = nil;
+   }
+
+}
+
 #pragma mark - Private
 - (void)updateDoneButtonWithState:(GKTextOverlayState)state
 {
@@ -187,7 +201,6 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 
 - (void)animateWithState:(GKTextOverlayState)state
 {
-
    [[UIApplication sharedApplication] setStatusBarStyle: (state != GKTextOverlayStateDisplay) ? UIStatusBarStyleDefault : UIStatusBarStyleLightContent];
    switch (state)
    {
@@ -206,30 +219,43 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 
 - (void)presentTextOverlay
 {
-   [self.topMostSuperview addSubview:self.doneButton];
-   [self.topMostSuperview addSubview:self.bodyTextView];
-   [self.topMostSuperview addSubview:self.headerLabel];
-   [self.topMostSuperview.layer addSublayer:self.dimLayer];
+   UIView* topMostSuperview = self.topMostSuperview;
+   [topMostSuperview addSubview:self.doneButton];
+   [topMostSuperview addSubview:self.bodyTextView];
+   [topMostSuperview addSubview:self.headerLabel];
+
+   [topMostSuperview.layer addSublayer:self.dimLayer];
+   UIImage* blurredBackground = [self blurredSnapshot];
+
+   self.dimLayer.contents = (id)blurredBackground.CGImage;
+
+   CGFloat padding = 10;
+   if (self.imageView)
+   {
+      [topMostSuperview addSubview:self.imageView];
+      self.imageView.frame = CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), CGRectGetHeight([UIScreen mainScreen].bounds)*.5);
+   }
+
    [self setParentNavigationBarsHidden:YES];
 
    self.headerLabel.layer.zPosition = 100;
    self.doneButton.layer.zPosition = 100;
    self.bodyTextView.layer.zPosition = 100;
-   self.bodyTextView.frame = CGRectMake(0, CGRectGetHeight([UIScreen mainScreen].bounds), CGRectGetWidth([UIScreen mainScreen].bounds), 400);
 
-   CGFloat padding = 10;
-   CGFloat textViewYPosition = CGRectGetMaxY(self.doneButton.frame) + padding;
-   CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - textViewYPosition*2;
+   CGFloat textViewYPosition = CGRectGetMaxY(self.doneButton.frame) + padding + CGRectGetHeight(self.imageView.frame);
+   CGFloat textViewHeight = self.imageView ? CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(self.imageView.frame) - padding : CGRectGetHeight([UIScreen mainScreen].bounds) - textViewYPosition - padding;
 
-//   [UIView animateWithDuration:.3 animations:^{
-      self.bodyTextView.frame = CGRectMake(0, textViewYPosition, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
-//   }];
+   self.bodyTextView.frame = CGRectMake(0, textViewYPosition, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
+
+   self.dimLayer.opacity = 1;
 }
 
 - (void)dismissTextOverlay
 {
+   self.dimLayer.opacity = 0;
    [self.headerLabel removeFromSuperview];
    [self.bodyTextView removeFromSuperview];
+   [self.imageView removeFromSuperview];
    [self.doneButton removeFromSuperview];
    [self.dimLayer removeFromSuperlayer];
    [self setParentNavigationBarsHidden:NO];
@@ -275,6 +301,26 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
       fontSize -= 2;
 
    } while (fontSize > minFontSize);
+}
+
+- (UIImage *)blurredSnapshot
+{
+   UIView* topMostSuperview = self.topMostSuperview;
+   UIGraphicsBeginImageContextWithOptions(CGSizeMake(CGRectGetWidth(topMostSuperview.frame),
+                                                     CGRectGetHeight(topMostSuperview.frame)),
+                                          NO, 1.0f);
+   [topMostSuperview drawViewHierarchyInRect:CGRectMake(0, 0, CGRectGetWidth(topMostSuperview.frame), CGRectGetHeight(topMostSuperview.frame)) afterScreenUpdates:NO];
+   UIImage *snapshotImage = UIGraphicsGetImageFromCurrentImageContext();
+
+   // Now apply the blur effect using Apple's UIImageEffect category
+   UIImage *blurredSnapshotImage = [snapshotImage applyDarkEffect];
+   // Or apply any other effects available in "UIImage+ImageEffects.h"
+   // UIImage *blurredSnapshotImage = [snapshotImage applyDarkEffect];
+   // UIImage *blurredSnapshotImage = [snapshotImage applyExtraLightEffect];
+
+   UIGraphicsEndImageContext();
+
+   return blurredSnapshotImage;
 }
 
 #pragma mark - Public

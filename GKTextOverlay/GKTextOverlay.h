@@ -18,6 +18,9 @@
 
 @property (nonatomic) BOOL hidesParentNavigationBarsOnZoom;
 
+// An optional image to display above the text
+@property (nonatomic) UIImage* image;
+
 + (instancetype)overlayWithHeaderText:(NSString*)headerText
                              bodyText:(NSString*)bodyText
                      parentController:(UIViewController*)parentController;

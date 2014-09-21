@@ -7,6 +7,7 @@
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="MainViewController">
             <connections>
+                <outlet property="backgroundImageView" destination="WPC-wn-xSx" id="KHb-4k-1Py"/>
                 <outlet property="view" destination="1" id="P6K-Bc-QU8"/>
             </connections>
         </placeholder>
@@ -15,6 +16,9 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
             <subviews>
+                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="WPC-wn-xSx">
+                    <rect key="frame" x="0.0" y="0.0" width="320" height="568"/>
+                </imageView>
                 <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RTd-kK-7UL">
                     <rect key="frame" x="87" y="269" width="146" height="30"/>
                     <constraints>
@@ -31,8 +35,12 @@
             </subviews>
             <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
             <constraints>
+                <constraint firstItem="WPC-wn-xSx" firstAttribute="top" secondItem="1" secondAttribute="top" id="8Dg-gs-ork"/>
                 <constraint firstAttribute="centerX" secondItem="RTd-kK-7UL" secondAttribute="centerX" id="CRV-Ub-iv7"/>
+                <constraint firstAttribute="bottom" secondItem="WPC-wn-xSx" secondAttribute="bottom" id="KgC-XK-75V"/>
+                <constraint firstItem="WPC-wn-xSx" firstAttribute="leading" secondItem="1" secondAttribute="leading" id="ipv-Da-HD2"/>
                 <constraint firstAttribute="centerY" secondItem="RTd-kK-7UL" secondAttribute="centerY" id="jeN-Pg-jJe"/>
+                <constraint firstAttribute="trailing" secondItem="WPC-wn-xSx" secondAttribute="trailing" id="qGA-jF-ddT"/>
             </constraints>
         </view>
     </objects>

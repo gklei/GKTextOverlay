@@ -23,6 +23,7 @@
 		8E1CB7B519BFD3D300F374C0 /* MainViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8E1CB7B419BFD3D300F374C0 /* MainViewController.xib */; };
 		8E1CB7B819BFD72B00F374C0 /* GKTextOverlay.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E1CB7B719BFD72B00F374C0 /* GKTextOverlay.m */; };
 		8E1CB7BB19BFF6CC00F374C0 /* FlatPillButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 8E1CB7BA19BFF6CC00F374C0 /* FlatPillButton.m */; };
+		8EE923C419CE74DC009E6D0A /* UIImage+ImageEffects.m in Sources */ = {isa = PBXBuildFile; fileRef = 8EE923C319CE74DC009E6D0A /* UIImage+ImageEffects.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +60,8 @@
 		8E1CB7B719BFD72B00F374C0 /* GKTextOverlay.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GKTextOverlay.m; sourceTree = "<group>"; };
 		8E1CB7B919BFF6CC00F374C0 /* FlatPillButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FlatPillButton.h; sourceTree = "<group>"; };
 		8E1CB7BA19BFF6CC00F374C0 /* FlatPillButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FlatPillButton.m; sourceTree = "<group>"; };
+		8EE923C219CE74DC009E6D0A /* UIImage+ImageEffects.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ImageEffects.h"; sourceTree = "<group>"; };
+		8EE923C319CE74DC009E6D0A /* UIImage+ImageEffects.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ImageEffects.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +121,8 @@
 		8E1CB78219BFD25F00F374C0 /* GKTextOverlay */ = {
 			isa = PBXGroup;
 			children = (
+				8EE923C219CE74DC009E6D0A /* UIImage+ImageEffects.h */,
+				8EE923C319CE74DC009E6D0A /* UIImage+ImageEffects.m */,
 				8E1CB7B919BFF6CC00F374C0 /* FlatPillButton.h */,
 				8E1CB7BA19BFF6CC00F374C0 /* FlatPillButton.m */,
 				8E1CB78B19BFD25F00F374C0 /* AppDelegate.h */,
@@ -261,6 +266,7 @@
 			files = (
 				8E1CB79619BFD25F00F374C0 /* MainViewController.m in Sources */,
 				8E1CB78D19BFD25F00F374C0 /* AppDelegate.m in Sources */,
+				8EE923C419CE74DC009E6D0A /* UIImage+ImageEffects.m in Sources */,
 				8E1CB7BB19BFF6CC00F374C0 /* FlatPillButton.m in Sources */,
 				8E1CB78919BFD25F00F374C0 /* main.m in Sources */,
 				8E1CB7B819BFD72B00F374C0 /* GKTextOverlay.m in Sources */,
@@ -466,6 +472,7 @@
 				8E1CB7B019BFD25F00F374C0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		8E1CB7B119BFD25F00F374C0 /* Build configuration list for PBXNativeTarget "GKTextOverlayTests" */ = {
 			isa = XCConfigurationList;
@@ -474,6 +481,7 @@
 				8E1CB7B319BFD25F00F374C0 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
