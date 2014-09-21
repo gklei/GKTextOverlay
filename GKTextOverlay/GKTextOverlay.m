@@ -100,7 +100,6 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    self.dimLayer = [CALayer layer];
    self.dimLayer.frame = [UIScreen mainScreen].bounds;
    self.dimLayer.actions = @{@"frame" : [NSNull null], @"bounds" : [NSNull null], @"position" : [NSNull null]};
-   self.dimLayer.opacity = 0;
 }
 
 - (void)setupDoneButton
@@ -246,13 +245,10 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    CGFloat textViewHeight = self.imageView ? CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(self.imageView.frame) - padding : CGRectGetHeight([UIScreen mainScreen].bounds) - textViewYPosition - padding;
 
    self.bodyTextView.frame = CGRectMake(0, textViewYPosition, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
-
-   self.dimLayer.opacity = 1;
 }
 
 - (void)dismissTextOverlay
 {
-   self.dimLayer.opacity = 0;
    [self.headerLabel removeFromSuperview];
    [self.bodyTextView removeFromSuperview];
    [self.imageView removeFromSuperview];
