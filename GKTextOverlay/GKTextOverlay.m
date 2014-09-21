@@ -113,7 +113,7 @@ static NSAttributedString* _attributedLinkForText(NSString* text, CGFloat textSi
    self.bodyTextView.showsVerticalScrollIndicator = YES;
    self.bodyTextView.editable = NO;
    self.bodyTextView.text = self.bodyText;
-   self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
+//   self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
    self.bodyTextView.indicatorStyle = UIScrollViewIndicatorStyleWhite;
 }
 
