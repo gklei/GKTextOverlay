@@ -10,13 +10,25 @@
 #import "FlatPillButton.h"
 #import "UIImage+ImageEffects.h"
 
+#define IS_IPAD (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+
 typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 {
    GKTextOverlayStateDefault,
    GKTextOverlayStateDisplay,
 };
 
-@interface GKTextOverlay ()
+static NSAttributedString* _attributedLinkForText(NSString* text, CGFloat textSize)
+{
+   NSURL* url = [NSURL URLWithString:@""];
+   UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Light" size:textSize];
+   NSDictionary* attributes = @{NSLinkAttributeName : url, NSFontAttributeName : font, NSUnderlineStyleAttributeName : @1, NSStrokeColorAttributeName : [UIColor blueColor]};
+   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:text attributes:attributes];
+
+   return attributedString;
+}
+
+@interface GKTextOverlay () <UITextViewDelegate>
 
 @property (nonatomic) UIView* topMostSuperview;
 
@@ -28,10 +40,16 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 
 @property (nonatomic) CALayer* dimLayer;
 @property (nonatomic) FlatPillButton* doneButton;
+@property (nonatomic) FlatPillButton* resizeButton;
 
 @property (nonatomic) NSString* headerText;
 @property (nonatomic) NSString* bodyText;
 @property (nonatomic) GKTextOverlayState state;
+
+@property (nonatomic) BOOL textViewEnlarged;
+@property (nonatomic) NSAttributedString* bodyTextViewAttributedText;
+
+@property (nonatomic) UIImage* image;
 
 @end
 
@@ -55,6 +73,9 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
       [self setupDimLayer];
       [self setupDoneButton];
       [self setupHeaderLabel];
+//      [self setupResizeButton];
+
+      self.textViewEnlarged = YES;
    }
    return self;
 }
@@ -86,12 +107,13 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 {
    self.bodyTextView = [[UITextView alloc] init];
    [self.bodyTextView setFont:[UIFont fontWithName:@"HelveticaNeue-Light" size:self.bodyFontSize]];
+//   self.bodyTextView.backgroundColor = [UIColor colorWithRed:.45 green:0 blue:.8 alpha:.4];
    self.bodyTextView.backgroundColor = [UIColor clearColor];
    self.bodyTextView.textColor = [UIColor whiteColor];
    self.bodyTextView.showsVerticalScrollIndicator = YES;
    self.bodyTextView.editable = NO;
-   self.bodyTextView.selectable = NO;
    self.bodyTextView.text = self.bodyText;
+   self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
    self.bodyTextView.indicatorStyle = UIScrollViewIndicatorStyleWhite;
 }
 
@@ -111,14 +133,33 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    CGFloat padding = 5;
    self.doneButton.frame = CGRectMake(CGRectGetWidth([UIScreen mainScreen].bounds) - doneButtonSize.width - padding,
                                       CGRectGetHeight([UIApplication sharedApplication].statusBarFrame) + padding,
-                                      60.0,
-                                      30.0);
+                                      doneButtonSize.width,
+                                      doneButtonSize.height);
 
    UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:14];
    NSAttributedString* attrString = [[NSAttributedString alloc] initWithString:@"Done" attributes:@{NSFontAttributeName : font,
                                                                                                     NSForegroundColorAttributeName : [UIColor whiteColor]}];
    [self.doneButton setAttributedTitle:attrString forState:UIControlStateNormal];
    [self.doneButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+}
+
+- (void)setupResizeButton
+{
+   self.resizeButton = [FlatPillButton button];
+   [self.resizeButton addTarget:self action:@selector(resizeTextView:) forControlEvents:UIControlEventTouchUpInside];
+
+   CGSize resizeButtonSize = {70, 30};
+   CGFloat padding = 5;
+   self.resizeButton.frame = CGRectMake(padding,
+                                        CGRectGetHeight([UIApplication sharedApplication].statusBarFrame) + padding,
+                                        resizeButtonSize.width,
+                                        resizeButtonSize.height);
+
+   UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:14];
+   NSAttributedString* attrString = [[NSAttributedString alloc] initWithString:@"Resize" attributes:@{NSFontAttributeName : font,
+                                                                                                    NSForegroundColorAttributeName : [UIColor whiteColor]}];
+   [self.resizeButton setAttributedTitle:attrString forState:UIControlStateNormal];
+   [self.resizeButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
 }
 
 #pragma mark - Property Overrides
@@ -164,30 +205,21 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 
 - (void)setImage:(UIImage *)image
 {
+   _image = image;
    if (image != nil)
    {
-      self.imageView = [[UIImageView alloc] initWithImage:image];
+      CGFloat padding = 10;
+      self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), 0)];
+      self.imageView.backgroundColor = [UIColor redColor];
+      self.imageView.image = _image;
    }
    else
    {
       self.imageView = nil;
    }
-
 }
 
 #pragma mark - Private
-- (void)updateDoneButtonWithState:(GKTextOverlayState)state
-{
-   if (state == GKTextOverlayStateDisplay)
-   {
-      [self.topMostSuperview addSubview:self.doneButton];
-   }
-   else
-   {
-      [self.doneButton removeFromSuperview];
-   }
-}
-
 - (void)setParentNavigationBarsHidden:(BOOL)hidden
 {
    UIViewController* parentViewController = self.parentController.parentViewController;
@@ -220,6 +252,7 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 {
    UIView* topMostSuperview = self.topMostSuperview;
    [topMostSuperview addSubview:self.doneButton];
+   [topMostSuperview addSubview:self.resizeButton];
    [topMostSuperview addSubview:self.bodyTextView];
    [topMostSuperview addSubview:self.headerLabel];
 
@@ -229,20 +262,15 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    self.dimLayer.contents = (id)blurredBackground.CGImage;
 
    CGFloat padding = 10;
-   if (self.imageView)
-   {
-      [topMostSuperview addSubview:self.imageView];
-      self.imageView.frame = CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), CGRectGetHeight([UIScreen mainScreen].bounds)*.5);
-   }
-
    [self setParentNavigationBarsHidden:YES];
 
    self.headerLabel.layer.zPosition = 100;
    self.doneButton.layer.zPosition = 100;
+   self.resizeButton.layer.zPosition = 100;
    self.bodyTextView.layer.zPosition = 100;
 
    CGFloat textViewYPosition = CGRectGetMaxY(self.doneButton.frame) + padding + CGRectGetHeight(self.imageView.frame);
-   CGFloat textViewHeight = self.imageView ? CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(self.imageView.frame) - padding : CGRectGetHeight([UIScreen mainScreen].bounds) - textViewYPosition - padding;
+   CGFloat textViewHeight = self.textViewEnlarged ? CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(self.imageView.frame) - padding : CGRectGetHeight([UIScreen mainScreen].bounds) - textViewYPosition - padding;
 
    self.bodyTextView.frame = CGRectMake(0, textViewYPosition, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
 }
@@ -253,7 +281,16 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    [self.bodyTextView removeFromSuperview];
    [self.imageView removeFromSuperview];
    [self.doneButton removeFromSuperview];
+   [self.resizeButton removeFromSuperview];
    [self.dimLayer removeFromSuperlayer];
+
+   CGFloat padding = 10;
+   CGRect imageViewCollapsedFrame = CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), 0);
+   CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewCollapsedFrame) - padding;
+   self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewCollapsedFrame), CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
+   self.imageView.frame = imageViewCollapsedFrame;
+   self.textViewEnlarged = YES;
+
    [self setParentNavigationBarsHidden:NO];
 }
 
@@ -262,6 +299,48 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    self.state = GKTextOverlayStateDefault;
 }
 
+- (void)resizeTextView:(FlatPillButton*)sender
+{
+   if (self.imageView.image)
+   {
+      UIView* topMostSuperview = self.topMostSuperview;
+      [topMostSuperview addSubview:self.imageView];
+
+      CGFloat padding = 10;
+      CGRect imageViewCollapsedFrame = CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), 0);
+      CGRect imageViewExpandedFrame = CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), CGRectGetHeight([UIScreen mainScreen].bounds)*.5);
+
+      if (self.textViewEnlarged)
+      {
+         self.imageView.frame = imageViewCollapsedFrame;
+         [UIView animateWithDuration:.3 animations:^
+          {
+             CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewExpandedFrame) - padding;
+             self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewExpandedFrame), CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
+             self.imageView.frame = imageViewExpandedFrame;
+
+             self.bodyTextView.attributedText = nil;
+             self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
+         }];
+      }
+      else
+      {
+         [self.bodyTextView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+         [UIView animateWithDuration:.3 animations:^
+         {
+            CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewCollapsedFrame) - padding;
+            self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewCollapsedFrame), CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
+            self.imageView.frame = imageViewCollapsedFrame;
+
+            self.bodyTextView.attributedText = nil;
+            self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
+         }];
+      }
+      self.textViewEnlarged = !self.textViewEnlarged;
+   }
+}
+
+#pragma mark - Helpers
 - (void)sizeLabel:(UILabel*)label toRect:(CGRect)labelRect
 {
    // Set the frame of the label to the targeted rectangle
@@ -310,9 +389,6 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 
    // Now apply the blur effect using Apple's UIImageEffect category
    UIImage *blurredSnapshotImage = [snapshotImage applyDarkEffect];
-   // Or apply any other effects available in "UIImage+ImageEffects.h"
-   // UIImage *blurredSnapshotImage = [snapshotImage applyDarkEffect];
-   // UIImage *blurredSnapshotImage = [snapshotImage applyExtraLightEffect];
 
    UIGraphicsEndImageContext();
 
@@ -323,6 +399,41 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
 - (void)present
 {
    self.state = GKTextOverlayStateDisplay;
+}
+
+- (void)makeSubstring:(NSString *)substring hyperlinkToDisplayImage:(UIImage *)image
+{
+   self.image = image;
+   NSRange range = [self.bodyText rangeOfString:substring];
+
+   if (range.length > 0)
+   {
+      NSString* firstSubstring = [self.bodyText substringWithRange:NSMakeRange(0, range.location)];
+      NSString* secondSubstring = [self.bodyText substringFromIndex:(range.location + range.length)];
+
+      UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Light" size:self.bodyFontSize];
+      NSDictionary* attributes = @{NSFontAttributeName : font, NSForegroundColorAttributeName : [UIColor whiteColor]};
+
+      NSMutableAttributedString *attributedText = [NSMutableAttributedString new];
+      [attributedText appendAttributedString:[[NSAttributedString alloc] initWithString:firstSubstring attributes:attributes]];
+      [attributedText appendAttributedString:_attributedLinkForText(substring, self.bodyFontSize)];
+      [attributedText appendAttributedString:[[NSAttributedString alloc] initWithString:secondSubstring attributes:attributes]];
+
+      self.bodyTextViewAttributedText = attributedText;
+      self.bodyTextView.attributedText = attributedText;
+      self.bodyTextView.delegate = self;
+   }
+}
+
+- (void)makeSubstring:(NSString *)substring hyperlinkToPlayVideoWithURL:(NSURL *)url
+{
+}
+
+#pragma mark - UITextViewDelegate
+- (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL*)URL inRange:(NSRange)characterRange
+{
+   [self resizeTextView:nil];
+   return NO;
 }
 
 @end
