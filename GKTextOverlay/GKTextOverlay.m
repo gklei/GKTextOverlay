@@ -328,6 +328,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
 
       if (self.textViewEnlarged)
       {
+         [self.bodyTextView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
          self.imageView.frame = imageViewCollapsedFrame;
          [UIView animateWithDuration:.3 animations:^
           {
