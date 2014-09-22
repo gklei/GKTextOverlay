@@ -27,7 +27,8 @@ static NSAttributedString* _attributedLinkForImage(NSString* text, CGFloat textS
 {
    NSURL* url = [NSURL URLWithString:GKTextOverlayImageLink];
    UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Light" size:textSize];
-   NSDictionary* attributes = @{NSLinkAttributeName : url, NSFontAttributeName : font, NSUnderlineStyleAttributeName : @1, NSStrokeColorAttributeName : [UIColor blueColor]};
+   NSDictionary* attributes = @{NSLinkAttributeName : url, NSFontAttributeName : font,
+                                NSUnderlineStyleAttributeName : @1};
    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:text attributes:attributes];
 
    return attributedString;
@@ -37,7 +38,9 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
 {
    NSURL* url = [NSURL URLWithString:GKTextOverlayVideoLink];
    UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Light" size:textSize];
-   NSDictionary* attributes = @{NSLinkAttributeName : url, NSFontAttributeName : font, NSUnderlineStyleAttributeName : @1, NSStrokeColorAttributeName : [UIColor blueColor]};
+   NSDictionary* attributes = @{NSLinkAttributeName : url,
+                                NSFontAttributeName : font,
+                                NSUnderlineStyleAttributeName : @1};
    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:text attributes:attributes];
 
    return attributedString;
@@ -131,6 +134,8 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
    self.bodyTextView.text = self.bodyText;
    //   self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
    self.bodyTextView.indicatorStyle = UIScrollViewIndicatorStyleWhite;
+   self.bodyTextView.linkTextAttributes = @{NSForegroundColorAttributeName : [UIColor colorWithRed:0 green:1 blue:1 alpha:1],
+                                            NSUnderlineColorAttributeName : [UIColor colorWithRed:0 green:1 blue:1 alpha:1]};
 }
 
 - (void)setupDimLayer
