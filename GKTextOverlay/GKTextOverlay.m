@@ -291,7 +291,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
    self.bodyTextView.layer.zPosition = 100;
 
    CGFloat textViewYPosition = CGRectGetMaxY(self.doneButton.frame) + padding + CGRectGetHeight(self.imageView.frame);
-   CGFloat textViewHeight = self.textViewEnlarged ? CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(self.imageView.frame) - padding : CGRectGetHeight([UIScreen mainScreen].bounds) - textViewYPosition - padding;
+   CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - textViewYPosition - padding;
 
    self.bodyTextView.frame = CGRectMake(0, textViewYPosition, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
 }
@@ -349,6 +349,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
       {
          [UIView animateWithDuration:.3 animations:^
           {
+             [self.bodyTextView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
              CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewCollapsedFrame) - padding;
              self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewCollapsedFrame), CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
              self.imageView.frame = imageViewCollapsedFrame;
