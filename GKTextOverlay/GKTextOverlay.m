@@ -89,7 +89,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
       [self setupDimLayer];
       [self setupDoneButton];
       [self setupHeaderLabel];
-//      [self setupResizeButton];
+      //      [self setupResizeButton];
 
       self.textViewEnlarged = YES;
    }
@@ -123,13 +123,13 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
 {
    self.bodyTextView = [[UITextView alloc] init];
    [self.bodyTextView setFont:[UIFont fontWithName:@"HelveticaNeue-Light" size:self.bodyFontSize]];
-//   self.bodyTextView.backgroundColor = [UIColor colorWithRed:.45 green:0 blue:.8 alpha:.4];
+   //   self.bodyTextView.backgroundColor = [UIColor colorWithRed:.45 green:0 blue:.8 alpha:.4];
    self.bodyTextView.backgroundColor = [UIColor clearColor];
    self.bodyTextView.textColor = [UIColor whiteColor];
    self.bodyTextView.showsVerticalScrollIndicator = YES;
    self.bodyTextView.editable = NO;
    self.bodyTextView.text = self.bodyText;
-//   self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
+   //   self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
    self.bodyTextView.indicatorStyle = UIScrollViewIndicatorStyleWhite;
 }
 
@@ -173,7 +173,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
 
    UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:14];
    NSAttributedString* attrString = [[NSAttributedString alloc] initWithString:@"Resize" attributes:@{NSFontAttributeName : font,
-                                                                                                    NSForegroundColorAttributeName : [UIColor whiteColor]}];
+                                                                                                      NSForegroundColorAttributeName : [UIColor whiteColor]}];
    [self.resizeButton setAttributedTitle:attrString forState:UIControlStateNormal];
    [self.resizeButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
 }
@@ -337,20 +337,20 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
 
              self.bodyTextView.attributedText = nil;
              self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
-         }];
+          }];
       }
       else
       {
          [self.bodyTextView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
          [UIView animateWithDuration:.3 animations:^
-         {
-            CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewCollapsedFrame) - padding;
-            self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewCollapsedFrame), CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
-            self.imageView.frame = imageViewCollapsedFrame;
+          {
+             CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewCollapsedFrame) - padding;
+             self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewCollapsedFrame), CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
+             self.imageView.frame = imageViewCollapsedFrame;
 
-            self.bodyTextView.attributedText = nil;
-            self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
-         }];
+             self.bodyTextView.attributedText = nil;
+             self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
+          }];
       }
       self.textViewEnlarged = !self.textViewEnlarged;
    }
@@ -458,6 +458,10 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
       [attributedText appendAttributedString:[[NSAttributedString alloc] initWithString:firstSubstring attributes:attributes]];
       [attributedText appendAttributedString:_attributedLinkForVideo(substring, self.bodyFontSize)];
       [attributedText appendAttributedString:[[NSAttributedString alloc] initWithString:secondSubstring attributes:attributes]];
+
+      self.bodyTextViewAttributedText = attributedText;
+      self.bodyTextView.attributedText = attributedText;
+      self.bodyTextView.delegate = self;
    }
 }
 
@@ -470,10 +474,11 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
    }
    else if ([URL.path isEqualToString:GKTextOverlayVideoLink] && self.moviePlayerViewController)
    {
+      [self dismiss:nil];
       [self.parentController presentMoviePlayerViewControllerAnimated:self.moviePlayerViewController];
       [self.moviePlayerViewController.moviePlayer play];
    }
-
+   
    return NO;
 }
 
