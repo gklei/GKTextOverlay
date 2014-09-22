@@ -347,7 +347,6 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
       }
       else
       {
-         [self.bodyTextView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
          [UIView animateWithDuration:.3 animations:^
           {
              CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewCollapsedFrame) - padding;
