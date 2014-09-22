@@ -32,7 +32,7 @@
 
 - (IBAction)displayText:(id)sender
 {
-   [self.textOverlay makeSubstring:@"impri2nt on the edge surface" hyperlinkToDisplayImage:[UIImage imageNamed:@"Silos"]];
+   [self.textOverlay makeSubstring:@"imprint on the edge surface" hyperlinkToDisplayImage:[UIImage imageNamed:@"Silos"]];
    [self.textOverlay present];
 }
 

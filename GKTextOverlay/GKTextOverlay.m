@@ -10,6 +10,8 @@
 #import "FlatPillButton.h"
 #import "UIImage+ImageEffects.h"
 
+@import MediaPlayer;
+
 #define IS_IPAD (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
 
 typedef NS_ENUM(NSUInteger, GKTextOverlayState)
@@ -18,9 +20,22 @@ typedef NS_ENUM(NSUInteger, GKTextOverlayState)
    GKTextOverlayStateDisplay,
 };
 
-static NSAttributedString* _attributedLinkForText(NSString* text, CGFloat textSize)
+static NSString* const GKTextOverlayImageLink = @"GKTextOverlayImage";
+static NSString* const GKTextOverlayVideoLink = @"GKTextOverlayVideo";
+
+static NSAttributedString* _attributedLinkForImage(NSString* text, CGFloat textSize)
 {
-   NSURL* url = [NSURL URLWithString:@""];
+   NSURL* url = [NSURL URLWithString:GKTextOverlayImageLink];
+   UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Light" size:textSize];
+   NSDictionary* attributes = @{NSLinkAttributeName : url, NSFontAttributeName : font, NSUnderlineStyleAttributeName : @1, NSStrokeColorAttributeName : [UIColor blueColor]};
+   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:text attributes:attributes];
+
+   return attributedString;
+}
+
+static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textSize)
+{
+   NSURL* url = [NSURL URLWithString:GKTextOverlayVideoLink];
    UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Light" size:textSize];
    NSDictionary* attributes = @{NSLinkAttributeName : url, NSFontAttributeName : font, NSUnderlineStyleAttributeName : @1, NSStrokeColorAttributeName : [UIColor blueColor]};
    NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:text attributes:attributes];
@@ -50,6 +65,7 @@ static NSAttributedString* _attributedLinkForText(NSString* text, CGFloat textSi
 @property (nonatomic) NSAttributedString* bodyTextViewAttributedText;
 
 @property (nonatomic) UIImage* image;
+@property (nonatomic) MPMoviePlayerViewController* moviePlayerViewController;
 
 @end
 
@@ -416,7 +432,7 @@ static NSAttributedString* _attributedLinkForText(NSString* text, CGFloat textSi
 
       NSMutableAttributedString *attributedText = [NSMutableAttributedString new];
       [attributedText appendAttributedString:[[NSAttributedString alloc] initWithString:firstSubstring attributes:attributes]];
-      [attributedText appendAttributedString:_attributedLinkForText(substring, self.bodyFontSize)];
+      [attributedText appendAttributedString:_attributedLinkForImage(substring, self.bodyFontSize)];
       [attributedText appendAttributedString:[[NSAttributedString alloc] initWithString:secondSubstring attributes:attributes]];
 
       self.bodyTextViewAttributedText = attributedText;
@@ -427,12 +443,37 @@ static NSAttributedString* _attributedLinkForText(NSString* text, CGFloat textSi
 
 - (void)makeSubstring:(NSString *)substring hyperlinkToPlayVideoWithURL:(NSURL *)url
 {
+   self.moviePlayerViewController = [[MPMoviePlayerViewController alloc] initWithContentURL:url];
+   NSRange range = [self.bodyText rangeOfString:substring];
+
+   if (range.length > 0)
+   {
+      NSString* firstSubstring = [self.bodyText substringWithRange:NSMakeRange(0, range.location)];
+      NSString* secondSubstring = [self.bodyText substringFromIndex:(range.location + range.length)];
+
+      UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Light" size:self.bodyFontSize];
+      NSDictionary* attributes = @{NSFontAttributeName : font, NSForegroundColorAttributeName : [UIColor whiteColor]};
+
+      NSMutableAttributedString *attributedText = [NSMutableAttributedString new];
+      [attributedText appendAttributedString:[[NSAttributedString alloc] initWithString:firstSubstring attributes:attributes]];
+      [attributedText appendAttributedString:_attributedLinkForVideo(substring, self.bodyFontSize)];
+      [attributedText appendAttributedString:[[NSAttributedString alloc] initWithString:secondSubstring attributes:attributes]];
+   }
 }
 
 #pragma mark - UITextViewDelegate
 - (BOOL)textView:(UITextView *)textView shouldInteractWithURL:(NSURL*)URL inRange:(NSRange)characterRange
 {
-   [self resizeTextView:nil];
+   if ([URL.path isEqualToString:GKTextOverlayImageLink])
+   {
+      [self resizeTextView:nil];
+   }
+   else if ([URL.path isEqualToString:GKTextOverlayVideoLink] && self.moviePlayerViewController)
+   {
+      [self.parentController presentMoviePlayerViewControllerAnimated:self.moviePlayerViewController];
+      [self.moviePlayerViewController.moviePlayer play];
+   }
+
    return NO;
 }
 
