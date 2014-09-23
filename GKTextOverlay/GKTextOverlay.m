@@ -337,8 +337,8 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
          self.imageView.frame = imageViewCollapsedFrame;
          [UIView animateWithDuration:.3 animations:^
           {
-             CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewExpandedFrame) - padding;
-             self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewExpandedFrame), CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
+             CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewExpandedFrame) - padding*2;
+             self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewExpandedFrame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
              self.imageView.frame = imageViewExpandedFrame;
 
              self.bodyTextView.attributedText = nil;
