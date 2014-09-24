@@ -335,7 +335,13 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
       {
          [self.bodyTextView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
          self.imageView.frame = imageViewCollapsedFrame;
-         [UIView animateWithDuration:.3 animations:^
+         [UIView animateWithDuration:.75
+                               delay:0
+              usingSpringWithDamping:.65
+               initialSpringVelocity:1.5
+                             options:UIViewAnimationOptionCurveEaseInOut
+                          animations:^
+//         [UIView animateWithDuration:.3 animations:^
           {
              CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewExpandedFrame) - padding - 5;
              self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewExpandedFrame) + 5, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
@@ -343,7 +349,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
 
              self.bodyTextView.attributedText = nil;
              self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
-          }];
+          } completion:nil];
       }
       else
       {
