@@ -231,7 +231,6 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
    {
       CGFloat padding = 10;
       self.imageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), 0)];
-      self.imageView.backgroundColor = [UIColor redColor];
       self.imageView.image = _image;
    }
    else
