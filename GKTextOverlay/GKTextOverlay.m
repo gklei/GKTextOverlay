@@ -70,6 +70,8 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
 @property (nonatomic) UIImage* image;
 @property (nonatomic) MPMoviePlayerViewController* moviePlayerViewController;
 
+@property (nonatomic) CGRect expandedTextViewFrame;
+
 @end
 
 @implementation GKTextOverlay
@@ -133,6 +135,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
    self.bodyTextView.editable = NO;
    self.bodyTextView.text = self.bodyText;
    //   self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
+   self.bodyTextView.textContainerInset = UIEdgeInsetsMake(0, 0, 10, 0);
    self.bodyTextView.indicatorStyle = UIScrollViewIndicatorStyleWhite;
    self.bodyTextView.linkTextAttributes = @{NSForegroundColorAttributeName : [UIColor colorWithRed:0 green:1 blue:1 alpha:1],
                                             NSUnderlineColorAttributeName : [UIColor colorWithRed:0 green:1 blue:1 alpha:1]};
@@ -289,10 +292,11 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
    self.resizeButton.layer.zPosition = 100;
    self.bodyTextView.layer.zPosition = 100;
 
-   CGFloat textViewYPosition = CGRectGetMaxY(self.doneButton.frame) + padding + CGRectGetHeight(self.imageView.frame);
-   CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - textViewYPosition - padding;
+   CGFloat textViewYPosition = CGRectGetMaxY(self.doneButton.frame) + padding*2 + CGRectGetHeight(self.imageView.frame);
+   CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - textViewYPosition;
 
    self.bodyTextView.frame = CGRectMake(0, textViewYPosition, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
+   self.expandedTextViewFrame = self.bodyTextView.frame;
 }
 
 - (void)dismissTextOverlay
@@ -340,27 +344,26 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
                initialSpringVelocity:1.5
                              options:UIViewAnimationOptionCurveEaseInOut
                           animations:^
-//         [UIView animateWithDuration:.3 animations:^
-          {
-             CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewExpandedFrame) - padding - 5;
-             self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewExpandedFrame) + 5, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
-             self.imageView.frame = imageViewExpandedFrame;
+         {
+            CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewExpandedFrame);
+            self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewExpandedFrame) + 5, CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
+            self.imageView.frame = imageViewExpandedFrame;
 
-             self.bodyTextView.attributedText = nil;
-             self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
+            self.bodyTextView.attributedText = nil;
+            self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
           } completion:nil];
       }
       else
       {
-         [UIView animateWithDuration:.3 animations:^
-          {
-             [self.bodyTextView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
-             CGFloat textViewHeight = CGRectGetHeight([UIScreen mainScreen].bounds) - CGRectGetMaxY(imageViewCollapsedFrame) - padding;
-             self.bodyTextView.frame = CGRectMake(0, CGRectGetMaxY(imageViewCollapsedFrame), CGRectGetWidth([UIScreen mainScreen].bounds), textViewHeight);
-             self.imageView.frame = imageViewCollapsedFrame;
+         [UIView animateWithDuration:.3
+                          animations:^
+         {
+            [self.bodyTextView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
+            self.bodyTextView.frame = self.expandedTextViewFrame;
+            self.imageView.frame = imageViewCollapsedFrame;
 
-             self.bodyTextView.attributedText = nil;
-             self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
+            self.bodyTextView.attributedText = nil;
+            self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
           }];
       }
       self.textViewEnlarged = !self.textViewEnlarged;
