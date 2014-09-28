@@ -355,10 +355,10 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
       }
       else
       {
+         [self.bodyTextView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
          [UIView animateWithDuration:.3
                           animations:^
          {
-            [self.bodyTextView scrollRectToVisible:CGRectMake(0, 0, 1, 1) animated:NO];
             self.bodyTextView.frame = self.expandedTextViewFrame;
             self.imageView.frame = imageViewCollapsedFrame;
 
