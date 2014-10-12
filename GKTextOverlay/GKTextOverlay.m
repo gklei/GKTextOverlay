@@ -71,6 +71,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
 @property (nonatomic) MPMoviePlayerViewController* moviePlayerViewController;
 
 @property (nonatomic) CGRect expandedTextViewFrame;
+@property (nonatomic) CALayer* topDimLayer;
 
 @end
 
@@ -165,6 +166,11 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
                                                                                                     NSForegroundColorAttributeName : [UIColor whiteColor]}];
    [self.doneButton setAttributedTitle:attrString forState:UIControlStateNormal];
    [self.doneButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+
+
+   self.topDimLayer = [CALayer layer];
+   self.topDimLayer.frame = CGRectMake(0, 0, CGRectGetWidth([UIScreen mainScreen].bounds), CGRectGetMaxY(self.doneButton.frame) + 15);
+   self.topDimLayer.backgroundColor = [UIColor colorWithWhite:0 alpha:.25].CGColor;
 }
 
 - (void)setupResizeButton
@@ -280,6 +286,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
    [topMostSuperview addSubview:self.headerLabel];
 
    [topMostSuperview.layer addSublayer:self.dimLayer];
+   [topMostSuperview.layer addSublayer:self.topDimLayer];
    UIImage* blurredBackground = [self blurredSnapshot];
 
    self.dimLayer.contents = (id)blurredBackground.CGImage;
@@ -307,6 +314,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
    [self.doneButton removeFromSuperview];
    [self.resizeButton removeFromSuperview];
    [self.dimLayer removeFromSuperlayer];
+   [self.topDimLayer removeFromSuperlayer];
 
    CGFloat padding = 10;
    CGRect imageViewCollapsedFrame = CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), 0);
@@ -330,7 +338,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
       UIView* topMostSuperview = self.topMostSuperview;
       [topMostSuperview addSubview:self.imageView];
 
-      CGFloat padding = 10;
+      CGFloat padding = 15;
       CGRect imageViewCollapsedFrame = CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), 0);
       CGRect imageViewExpandedFrame = CGRectMake(0, CGRectGetMaxY(self.doneButton.frame) + padding, CGRectGetWidth([UIScreen mainScreen].bounds), CGRectGetHeight([UIScreen mainScreen].bounds)*.5);
 
