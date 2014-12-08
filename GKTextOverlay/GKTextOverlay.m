@@ -86,7 +86,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
 
       _headerText = headerText;
 
-      _bodyFontSize = 20;
+      _bodyFontSize = IS_IPAD ? 28 : 18;
       _bodyText = bodyText;
 
       self.parentController = parentController;
@@ -136,7 +136,7 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
    self.bodyTextView.editable = NO;
    self.bodyTextView.text = self.bodyText;
    //   self.bodyTextView.attributedText = self.bodyTextViewAttributedText;
-   self.bodyTextView.textContainerInset = UIEdgeInsetsMake(0, 0, 10, 0);
+   self.bodyTextView.textContainerInset = UIEdgeInsetsMake(0, 5, 10, 5);
    self.bodyTextView.indicatorStyle = UIScrollViewIndicatorStyleWhite;
    self.bodyTextView.linkTextAttributes = @{NSForegroundColorAttributeName : [UIColor colorWithRed:0 green:1 blue:1 alpha:1],
                                             NSUnderlineColorAttributeName : [UIColor colorWithRed:0 green:1 blue:1 alpha:1]};
@@ -154,14 +154,15 @@ static NSAttributedString* _attributedLinkForVideo(NSString* text, CGFloat textS
    self.doneButton = [FlatPillButton button];
    [self.doneButton addTarget:self action:@selector(dismiss:) forControlEvents:UIControlEventTouchUpInside];
 
-   CGSize doneButtonSize = {60, 30};
+   CGSize doneButtonSize = IS_IPAD ? CGSizeMake(110, 50) : CGSizeMake(60, 30);
    CGFloat padding = 5;
    self.doneButton.frame = CGRectMake(CGRectGetWidth([UIScreen mainScreen].bounds) - doneButtonSize.width - padding,
                                       CGRectGetHeight([UIApplication sharedApplication].statusBarFrame) + padding,
                                       doneButtonSize.width,
                                       doneButtonSize.height);
 
-   UIFont* font = [UIFont fontWithName:@"HelveticaNeue-Bold" size:14];
+   CGFloat fontSize = IS_IPAD ? 28 : 16;
+   UIFont* font = [UIFont fontWithName:@"HelveticaNeue-CondensedBold" size:fontSize];
    NSAttributedString* attrString = [[NSAttributedString alloc] initWithString:@"Done" attributes:@{NSFontAttributeName : font,
                                                                                                     NSForegroundColorAttributeName : [UIColor whiteColor]}];
    [self.doneButton setAttributedTitle:attrString forState:UIControlStateNormal];
